@@ -30,6 +30,13 @@
   --radius: 2px;
   --radius-lg: 6px;
   --container: 1180px;
+
+  /* motion tokens */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 0.18s;
+  --dur-base: 0.32s;
+  --dur-slow: 0.6s;
 }
 
 * {
@@ -38,6 +45,16 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
@@ -102,6 +119,16 @@ p { margin: 0 0 1em; }
 }
 .eyebrow .swatch-dot { width: 6px; height: 6px; }
 
+/* the swatch dot gets a soft pulse wherever it marks something "live" —
+   an active filter, an active nav link, a new-order status */
+.swatch-dot.pulse {
+  animation: swatchPulse 1.8s var(--ease-in-out) infinite;
+}
+@keyframes swatchPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(183, 110, 121, 0.45); }
+  50% { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(183, 110, 121, 0); }
+}
+
 .swatch-divider {
   display: flex;
   align-items: center;
@@ -146,22 +173,26 @@ p { margin: 0 0 1em; }
   text-transform: uppercase;
   border-radius: var(--radius);
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: transform var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
 }
+.btn:active { transform: scale(0.97); }
 
 .btn-primary {
   background: var(--wine);
   color: var(--white);
 }
-.btn-primary:hover { background: var(--ink); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary:hover { background: var(--ink); box-shadow: 0 6px 18px rgba(92,35,49,0.25); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-outline {
   background: transparent;
   border-color: var(--wine);
   color: var(--wine);
 }
-.btn-outline:hover { background: var(--wine); color: var(--white); }
+.btn-outline:hover { background: var(--wine); color: var(--white); transform: translateY(-1px); }
 
 .btn-ghost {
   background: transparent;
@@ -179,6 +210,17 @@ p { margin: 0 0 1em; }
 
 .btn-sm { padding: 0.5rem 1rem; font-size: 0.75rem; }
 .btn-block { width: 100%; }
+
+/* subtle shimmer sweep used on the primary CTA in the hero */
+.btn-shimmer { position: relative; overflow: hidden; }
+.btn-shimmer::after {
+  content: '';
+  position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(115deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left var(--dur-slow) var(--ease-out);
+}
+.btn-shimmer:hover::after { left: 130%; }
 
 /* --- Forms --------------------------------------------------------------- */
 .field {
@@ -203,6 +245,7 @@ p { margin: 0 0 1em; }
   border-radius: var(--radius);
   background: var(--white);
   color: var(--ink);
+  transition: outline-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .field input:focus,
 .field select:focus,
@@ -220,6 +263,7 @@ p { margin: 0 0 1em; }
   border-radius: var(--radius-lg);
   padding: 2.5rem;
   box-shadow: var(--shadow);
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
 }
 .form-error {
   background: var(--rose-pale);
@@ -228,6 +272,7 @@ p { margin: 0 0 1em; }
   border-radius: var(--radius);
   font-size: 0.85rem;
   margin-bottom: 1rem;
+  animation: shake 0.4s var(--ease-in-out);
 }
 .form-success {
   background: #eef3ef;
@@ -236,6 +281,7 @@ p { margin: 0 0 1em; }
   border-radius: var(--radius);
   font-size: 0.85rem;
   margin-bottom: 1rem;
+  animation: fadeSlideUp var(--dur-base) var(--ease-out);
 }
 
 /* --- Cards / product grid -------------------------------------------- */
@@ -245,29 +291,50 @@ p { margin: 0 0 1em; }
   gap: 1.75rem;
 }
 
+/* stagger children in as they enter the grid */
+.product-grid .product-card {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+.product-grid .product-card:nth-child(1) { animation-delay: 0.02s; }
+.product-grid .product-card:nth-child(2) { animation-delay: 0.06s; }
+.product-grid .product-card:nth-child(3) { animation-delay: 0.10s; }
+.product-grid .product-card:nth-child(4) { animation-delay: 0.14s; }
+.product-grid .product-card:nth-child(5) { animation-delay: 0.18s; }
+.product-grid .product-card:nth-child(6) { animation-delay: 0.22s; }
+.product-grid .product-card:nth-child(n+7) { animation-delay: 0.24s; }
+
 .product-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .product-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow);
+  border-color: var(--rose-soft);
 }
 .product-card .thumb {
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--cream-deep);
+  position: relative;
 }
 .product-card .thumb img {
   width: 100%; height: 100%; object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s var(--ease-out);
 }
-.product-card:hover .thumb img { transform: scale(1.05); }
+.product-card:hover .thumb img { transform: scale(1.06); }
+
+/* emoji/icon placeholder thumb used where no product photo exists */
+.product-card .thumb.icon-thumb {
+  display: flex; align-items: center; justify-content: center; font-size: 3.4rem;
+}
+
 .product-card .body { padding: 1.1rem 1.2rem 1.4rem; flex: 1; display: flex; flex-direction: column; }
 .product-card .cat { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); font-weight: 700; }
 .product-card h3 { font-size: 1.05rem; margin: 0.3em 0; }
@@ -280,15 +347,21 @@ p { margin: 0 0 1em; }
 }
 .badge-out { background: var(--ink-soft); }
 .badge-corner {
-  position: absolute; top: 10px; left: 10px; background: var(--wine);
+  position: absolute; top: 10px; left: 10px; background: var(--wine); z-index: 2;
 }
 .wishlist-heart {
   position: absolute; top: 8px; right: 8px; z-index: 2;
   width: 34px; height: 34px; border-radius: 50%; border: none;
   background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;
-  font-size: 1.05rem; transition: transform 0.15s ease;
+  font-size: 1.05rem; transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
-.wishlist-heart:hover { transform: scale(1.1); }
+.wishlist-heart:hover { transform: scale(1.15); }
+.wishlist-heart.active { animation: heartPop 0.4s var(--ease-out); }
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
 
 .rating {
   display: flex; align-items: center; gap: 4px; color: var(--gold); font-size: 0.8rem;
@@ -306,9 +379,9 @@ p { margin: 0 0 1em; }
   font-size: 0.8rem; font-weight: 600;
   background: var(--white);
   color: var(--ink-soft);
-  transition: all 0.15s ease;
+  transition: all var(--dur-fast) var(--ease-out);
 }
-.chip:hover { border-color: var(--rose); color: var(--wine); }
+.chip:hover { border-color: var(--rose); color: var(--wine); transform: translateY(-1px); }
 .chip.active {
   background: var(--wine); border-color: var(--wine); color: var(--white);
 }
@@ -320,6 +393,7 @@ p { margin: 0 0 1em; }
   background: rgba(251, 246, 243, 0.94);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line);
+  animation: fadeSlideDown var(--dur-slow) var(--ease-out);
 }
 .navbar-inner {
   display: flex; align-items: center; justify-content: space-between;
@@ -329,19 +403,27 @@ p { margin: 0 0 1em; }
 .brand {
   font-family: var(--font-display); font-style: italic; font-weight: 700;
   font-size: 1.5rem; color: var(--wine); display: flex; align-items: center; gap: 0.4rem;
+  transition: color var(--dur-fast) var(--ease-out);
 }
+.brand:hover { color: var(--rose); }
 .nav-links { display: flex; align-items: center; gap: 1.8rem; }
-.nav-links a { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); position: relative; padding-bottom: 4px; }
+.nav-links a { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); position: relative; padding-bottom: 4px; transition: color var(--dur-fast) var(--ease-out); }
+.nav-links a:hover { color: var(--wine); }
 .nav-links a.active { color: var(--wine); }
 .nav-links a.active::after {
   content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--rose);
+  animation: growLine var(--dur-base) var(--ease-out);
 }
+@keyframes growLine { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+
 .nav-actions { display: flex; align-items: center; gap: 1rem; }
-.icon-btn { position: relative; font-size: 1.25rem; color: var(--ink); }
+.icon-btn { position: relative; font-size: 1.25rem; color: var(--ink); transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.icon-btn:hover { color: var(--rose); transform: translateY(-1px); }
 .cart-count {
   position: absolute; top: -8px; right: -10px; background: var(--rose); color: var(--white);
   font-size: 0.65rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+  animation: heartPop 0.35s var(--ease-out);
 }
 .mobile-toggle { display: none; }
 
@@ -354,8 +436,8 @@ p { margin: 0 0 1em; }
 .footer { background: var(--ink); color: var(--cream-deep); padding: 3.5rem 0 1.5rem; margin-top: 5rem; }
 .footer .container { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2.5rem; }
 .footer h4 { color: var(--cream); font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; }
-.footer a { display: block; font-size: 0.85rem; color: rgba(251,246,243,0.7); margin-bottom: 0.6rem; }
-.footer a:hover { color: var(--rose-soft); }
+.footer a { display: block; font-size: 0.85rem; color: rgba(251,246,243,0.7); margin-bottom: 0.6rem; transition: color var(--dur-fast) var(--ease-out), padding-left var(--dur-fast) var(--ease-out); }
+.footer a:hover { color: var(--rose-soft); padding-left: 4px; }
 .footer-bottom { text-align: center; font-size: 0.75rem; color: rgba(251,246,243,0.45); margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(251,246,243,0.12); }
 @media (max-width: 760px) { .footer .container { grid-template-columns: 1fr 1fr; } }
 
@@ -364,10 +446,19 @@ p { margin: 0 0 1em; }
   display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 3rem;
   padding: 4rem 0 2rem;
 }
-.hero .swatch-collage { position: relative; aspect-ratio: 4/5; }
+.hero .eyebrow, .hero h1, .hero .lede, .hero .cta-row {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+.hero h1 { animation-delay: 0.06s; }
+.hero .lede { animation-delay: 0.12s; }
+.hero .cta-row { animation-delay: 0.18s; }
+.hero .swatch-collage { position: relative; aspect-ratio: 4/5; animation: fadeIn 0.8s var(--ease-out) both; }
 .hero .swatch-collage img {
   position: absolute; border-radius: var(--radius-lg); box-shadow: var(--shadow); object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
+.hero .swatch-collage:hover img:nth-child(1) { transform: translateY(-4px) rotate(-0.6deg); }
+.hero .swatch-collage:hover img:nth-child(2) { transform: translateY(-4px) rotate(0.8deg); }
 .hero .swatch-collage img:nth-child(1) { width: 62%; height: 62%; top: 0; left: 8%; z-index: 2; }
 .hero .swatch-collage img:nth-child(2) { width: 46%; height: 46%; bottom: 4%; right: 0; z-index: 1; }
 .hero h1 { font-style: italic; }
@@ -393,13 +484,15 @@ p { margin: 0 0 1em; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.empty-state { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); animation: fadeIn var(--dur-slow) var(--ease-out); }
 
 .table {
   width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius-lg); overflow: hidden;
 }
 .table th, .table td { text-align: left; padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
 .table th { background: var(--cream-deep); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
+.table tbody tr { transition: background var(--dur-fast) var(--ease-out); }
+.table tbody tr:hover { background: var(--cream); }
 .table-wrap { overflow-x: auto; }
 
 .status-pill { font-size: 0.7rem; font-weight: 700; padding: 0.25em 0.7em; border-radius: 20px; text-transform: capitalize; }
@@ -413,13 +506,15 @@ p { margin: 0 0 1em; }
 .admin-sidebar a {
   display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; border-radius: var(--radius);
   font-size: 0.88rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 0.3rem;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 .admin-sidebar a.active, .admin-sidebar a:hover { background: var(--rose-pale); color: var(--wine); }
 .admin-content { padding: 2rem 2.5rem; }
 @media (max-width: 900px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); } }
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
-.stat-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.4rem 1.6rem; }
+.stat-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.4rem 1.6rem; transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); animation: fadeSlideUp var(--dur-base) var(--ease-out) both; }
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .stat-card .num { font-family: var(--font-display); font-size: 2rem; color: var(--wine); }
 .stat-card .label { font-size: 0.78rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
 
@@ -427,18 +522,22 @@ p { margin: 0 0 1em; }
 .qty-control button {
   width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--white);
   display: flex; align-items: center; justify-content: center; font-weight: 700;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
-.cart-item { display: flex; gap: 1rem; padding: 1.2rem 0; border-bottom: 1px solid var(--line); }
+.qty-control button:hover { background: var(--rose-pale); transform: scale(1.06); }
+.cart-item { display: flex; gap: 1rem; padding: 1.2rem 0; border-bottom: 1px solid var(--line); animation: fadeSlideUp var(--dur-base) var(--ease-out) both; }
 .cart-item img { width: 84px; height: 84px; object-fit: cover; border-radius: var(--radius); }
-.cart-summary { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.6rem; height: fit-content; }
+.cart-item .thumb.icon-thumb { width: 84px; height: 84px; font-size: 2.1rem; border-radius: var(--radius); }
+.cart-summary { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.6rem; height: fit-content; animation: fadeSlideUp var(--dur-slow) var(--ease-out) both; }
 .cart-summary .row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.9rem; }
 .cart-summary .total { font-weight: 700; font-size: 1.1rem; color: var(--wine); border-top: 1px solid var(--line); padding-top: 0.8rem; margin-top: 0.4rem; }
 
 .pdp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
 .pdp-gallery img { border-radius: var(--radius-lg); aspect-ratio: 1/1; object-fit: cover; }
 .shade-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.shade-chip { padding: 0.4rem 0.9rem; border: 1px solid var(--line); border-radius: 20px; font-size: 0.78rem; }
+.shade-chip { padding: 0.4rem 0.9rem; border: 1px solid var(--line); border-radius: 20px; font-size: 0.78rem; transition: all var(--dur-fast) var(--ease-out); }
 .shade-chip.active { background: var(--wine); color: var(--white); border-color: var(--wine); }
+.shade-chip:hover { transform: translateY(-1px); }
 @media (max-width: 800px) { .pdp-grid { grid-template-columns: 1fr; } }
 
 .review-item { border-bottom: 1px solid var(--line); padding: 1.2rem 0; }
@@ -447,7 +546,9 @@ p { margin: 0 0 1em; }
 .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 2.5rem; }
 .pagination button {
   width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--white); font-size: 0.85rem;
+  transition: all var(--dur-fast) var(--ease-out);
 }
+.pagination button:hover:not(:disabled) { border-color: var(--rose); }
 .pagination button.active { background: var(--wine); color: var(--white); border-color: var(--wine); }
 .pagination button:disabled { opacity: 0.4; }
 
@@ -455,11 +556,12 @@ p { margin: 0 0 1em; }
 .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.75rem; }
 .blog-card {
   background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg);
-  overflow: hidden; display: flex; flex-direction: column; transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden; display: flex; flex-direction: column; transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
 .blog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
 .blog-card .cover { aspect-ratio: 16/10; overflow: hidden; background: var(--cream-deep); }
-.blog-card .cover img { width: 100%; height: 100%; object-fit: cover; }
+.blog-card .cover img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-slow) var(--ease-out); }
+.blog-card:hover .cover img { transform: scale(1.05); }
 .blog-card .body { padding: 1.2rem 1.3rem 1.5rem; }
 .blog-card .tag-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
 .tag-pill { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--rose); background: var(--rose-pale); padding: 0.2em 0.6em; border-radius: 20px; }
@@ -477,12 +579,83 @@ p { margin: 0 0 1em; }
   background: linear-gradient(135deg, var(--wine), var(--ink));
   color: var(--white); border-radius: var(--radius-lg); padding: 2.2rem 2.4rem; margin-bottom: 2rem;
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out);
 }
 .dashboard-hero h2 { color: var(--white); margin-bottom: 0.2rem; }
 .dashboard-hero p { color: rgba(255,255,255,0.75); margin: 0; }
 .dash-link-card {
   background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 1.4rem 1.6rem; display: flex; align-items: center; gap: 1rem; transition: box-shadow 0.2s ease;
+  padding: 1.4rem 1.6rem; display: flex; align-items: center; gap: 1rem; transition: box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
-.dash-link-card:hover { box-shadow: var(--shadow); }
+.dash-link-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 .dash-link-card .icon { width: 42px; height: 42px; border-radius: 50%; background: var(--rose-pale); color: var(--wine); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+
+/* ============================================================
+   Animation primitives (additive — introduced for this build,
+   used by the utility classes/components above and available
+   for direct use on any element: fade-in, slide-up, cart-drawer
+   slide, page transitions, toast entrances, skeleton shimmer).
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.fade-in { animation: fadeIn var(--dur-slow) var(--ease-out) both; }
+.fade-slide-up { animation: fadeSlideUp var(--dur-slow) var(--ease-out) both; }
+.scale-in { animation: scaleIn var(--dur-base) var(--ease-out) both; }
+
+/* cart drawer slide-in panel + backdrop fade */
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(36, 27, 30, 0.45);
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-out);
+  z-index: 98;
+}
+.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+.drawer-panel {
+  position: fixed; top: 0; right: 0; height: 100%; width: 420px; max-width: 92vw;
+  background: var(--cream); box-shadow: -8px 0 30px rgba(36,27,30,0.18);
+  transform: translateX(100%); transition: transform var(--dur-base) var(--ease-out);
+  z-index: 99; display: flex; flex-direction: column;
+}
+.drawer-panel.open { transform: translateX(0); }
+
+/* toast entrance */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast { animation: toastIn var(--dur-base) var(--ease-out) both; }
+
+/* skeleton shimmer for loading product cards */
+.skeleton {
+  background: linear-gradient(90deg, var(--cream-deep) 25%, #ece0d9 37%, var(--cream-deep) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius-lg);
+}
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* page-level route transition wrapper */
+.page-transition { animation: fadeSlideUp var(--dur-base) var(--ease-out) both; }
