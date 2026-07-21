@@ -11,7 +11,7 @@ export default defineConfig({
       // with NO hardcoded host/port — works in dev (proxied to 5001) and in
       // production (same-origin, since Express serves the build itself).
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'http://localhost:5000',
         changeOrigin: true,
       },
       // If your product images/uploads are served by the backend from a
@@ -19,7 +19,7 @@ export default defineConfig({
       // proxy that too so <img src="/uploads/xyz.jpg"> resolves correctly
       // in dev instead of 404-ing against the Vite dev server.
       '/uploads': {
-        target: 'http://localhost:5001',
+        target: 'http://localhost:5000',
         changeOrigin: true,
       },
     },
