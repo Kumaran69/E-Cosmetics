@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -78,13 +79,25 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/blog', require('./routes/blogRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 
-// Serve frontend build in production (optional single-server deployment)
+// Serve frontend build in production — ONLY if a build actually exists
+// alongside this deployment (combined single-service mode). In a split
+// deployment (backend as its own Render service, frontend as a separate
+// Static Site), frontend/dist will never exist here, so this falls back
+// to a plain API-only response instead of crashing with ENOENT.
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../frontend/dist');
-  app.use(express.static(frontendBuildPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
+  const indexPath = path.join(frontendBuildPath, 'index.html');
+
+  if (fs.existsSync(indexPath)) {
+    app.use(express.static(frontendBuildPath));
+    app.get('*', (req, res) => {
+      res.sendFile(indexPath);
+    });
+  } else {
+    app.get('/', (req, res) => {
+      res.json({ success: true, message: 'Cosmetics E-commerce API - Production Mode' });
+    });
+  }
 } else {
   app.get('/', (req, res) => {
     res.json({ success: true, message: 'Cosmetics E-commerce API - Development Mode' });
