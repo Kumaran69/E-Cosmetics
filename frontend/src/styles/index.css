@@ -659,3 +659,147 @@ p { margin: 0 0 1em; }
 
 /* page-level route transition wrapper */
 .page-transition { animation: fadeSlideUp var(--dur-base) var(--ease-out) both; }
+
+/* ============================================================
+   Responsive layer — mobile / tablet / desktop
+   Purely additive: nothing above is changed, these rules only
+   adjust spacing, sizing and layout direction at smaller
+   viewports. Mobile-first components (grids, forms, nav) fall
+   back to single-column / stacked layouts below 600px, with a
+   tablet tier around 768–1024px for two-column layouts.
+   ============================================================ */
+
+/* ---- Tablet tier (≤1024px) ---- */
+@media (max-width: 1024px) {
+  .container { padding: 0 20px; }
+  .page-section { padding: 3rem 0; }
+
+  .admin-layout { grid-template-columns: 200px 1fr; }
+  .admin-content { padding: 1.75rem 1.5rem; }
+
+  .pdp-grid { gap: 2rem; }
+
+  .dashboard-hero { padding: 1.8rem 2rem; }
+}
+
+/* ---- Small tablet / large phone (≤860px) — matches existing nav breakpoint ---- */
+@media (max-width: 860px) {
+  .container { padding: 0 18px; }
+
+  .navbar-inner { padding: 0.9rem 18px; }
+  .brand { font-size: 1.3rem; }
+
+  .hero { padding: 2.5rem 0 1.5rem; gap: 2rem; }
+  .hero .cta-row { flex-wrap: wrap; }
+  .hero .cta-row .btn { flex: 1 1 auto; min-width: 140px; }
+
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.2rem; }
+
+  .stat-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .stat-card { padding: 1.1rem 1.3rem; }
+  .stat-card .num { font-size: 1.6rem; }
+
+  .blog-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.2rem; }
+
+  .section-head { align-items: flex-start; flex-direction: column; gap: 0.6rem; }
+
+  .form-card { padding: 2rem 1.6rem; }
+}
+
+/* ---- Phone (≤600px) ---- */
+@media (max-width: 600px) {
+  html { font-size: 15px; }
+  .container { padding: 0 16px; }
+  .page-section { padding: 2.25rem 0; }
+
+  /* Navbar: collapse text-only actions, keep icons + brand */
+  .navbar-inner { padding: 0.8rem 16px; gap: 0.6rem; }
+  .nav-actions { gap: 0.7rem; }
+  .icon-btn { font-size: 1.15rem; }
+
+  /* Hero stacks and centers on phones */
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: left;
+    padding: 2rem 0 1.25rem;
+    gap: 1.5rem;
+  }
+  .hero .lede { max-width: none; }
+  .hero .cta-row { flex-direction: column; }
+  .hero .cta-row .btn { width: 100%; }
+  .hero .swatch-collage { aspect-ratio: 4/3; }
+
+  /* Product grid: two columns on phones, single column on very small ones */
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+  .product-card .body { padding: 0.9rem 0.9rem 1.1rem; }
+  .product-card h3 { font-size: 0.95rem; min-height: 2.5em; }
+  .price { font-size: 1rem; }
+
+  /* Forms: reduce padding, full-width fields already stack by default */
+  .form-card { padding: 1.6rem 1.2rem; }
+  .field-row { flex-direction: column; gap: 0; }
+
+  /* Cart: stack item content under the thumbnail on very narrow screens */
+  .cart-item { gap: 0.75rem; }
+  .cart-item img,
+  .cart-item .thumb.icon-thumb { width: 64px; height: 64px; }
+  .cart-summary { padding: 1.2rem; }
+
+  /* PDP: single column, gallery first */
+  .pdp-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+
+  /* Admin: sidebar becomes a horizontal scroll strip, content full-bleed */
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar {
+    display: flex; flex-direction: row; overflow-x: auto;
+    border-right: none; border-bottom: 1px solid var(--line);
+    padding: 0.75rem 1rem; gap: 0.4rem;
+  }
+  .admin-sidebar a { white-space: nowrap; margin-bottom: 0; }
+  .admin-content { padding: 1.5rem 1rem; }
+
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .dashboard-hero { flex-direction: column; align-items: flex-start; padding: 1.5rem 1.4rem; }
+
+  .blog-grid { grid-template-columns: 1fr; }
+
+  .footer { padding: 2.5rem 0 1.25rem; margin-top: 3rem; }
+  .footer .container { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
+
+  .table th, .table td { padding: 0.7rem 0.75rem; font-size: 0.82rem; }
+
+  .pagination button { width: 32px; height: 32px; font-size: 0.78rem; }
+
+  /* Cart drawer takes full width on phones instead of a fixed 420px panel */
+  .drawer-panel { width: 100%; max-width: 100vw; }
+}
+
+/* ---- Very small phones (≤380px) ---- */
+@media (max-width: 380px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .footer .container { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr; }
+  h1 { font-size: 1.9rem; }
+}
+
+/* ---- Large desktop refinement (≥1440px) ---- */
+@media (min-width: 1440px) {
+  :root { --container: 1320px; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+
+/* ---- Touch device adjustments: bigger tap targets, no hover-only affordances ---- */
+@media (hover: none) and (pointer: coarse) {
+  .btn, .chip, .qty-control button, .pagination button, .icon-btn {
+    min-height: 40px;
+  }
+  .wishlist-heart { width: 38px; height: 38px; }
+  /* remove hover-lift transforms that can't be triggered on touch, avoid stuck states */
+  .product-card:hover,
+  .stat-card:hover,
+  .dash-link-card:hover,
+  .blog-card:hover {
+    transform: none;
+  }
+}
