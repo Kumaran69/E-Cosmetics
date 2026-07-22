@@ -31,9 +31,21 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // CORS
+const allowedOrigins = [
+  process.env.CLIENT_URL,        // production frontend
+  'http://localhost:5173',       // local Vite dev server
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || '*',
+    origin: (origin, callback) => {
+      // allow requests with no origin (e.g. curl, Postman, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
