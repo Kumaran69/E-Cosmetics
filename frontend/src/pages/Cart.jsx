@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useCart } from '../context/CartContext';
 
 export default function Cart() {
   const { cart, subtotal, updateItem, removeItem } = useCart();
+  const navigate = useNavigate();
 
   const handleQtyChange = async (itemId, quantity) => {
     try {
@@ -20,6 +21,10 @@ export default function Cart() {
     } catch (err) {
       toast.error(err.message);
     }
+  };
+
+  const handleCheckout = () => {
+    navigate('/checkout');
   };
 
   if (!cart.items || cart.items.length === 0) {
@@ -79,7 +84,7 @@ export default function Cart() {
             <span>Total</span>
             <span>₹{subtotal}</span>
           </div>
-          <button className="btn btn-primary btn-block" style={{ marginTop: '1rem' }} disabled title="Checkout / payment integration coming soon">
+          <button className="btn btn-primary btn-block" style={{ marginTop: '1rem' }} onClick={handleCheckout}>
             Proceed to Checkout
           </button>
         </div>
