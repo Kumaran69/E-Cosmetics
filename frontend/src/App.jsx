@@ -32,6 +32,7 @@ import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
+import OrderHistory from './pages/OrderHistory';
 
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -65,6 +66,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+        <Route path="/dashboard/orders" element={<OrderHistory />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route
